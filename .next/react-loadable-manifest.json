@@ -1,0 +1,28 @@
+{
+  "pages/[lang]/ClothingTransformBlock.js -> ../../locales/translations": {
+    "id": "pages/[lang]/ClothingTransformBlock.js -> ../../locales/translations",
+    "files": []
+  },
+  "pages/[lang]/ExamplesGalleryBlock.js -> ../../locales/translations": {
+    "id": "pages/[lang]/ExamplesGalleryBlock.js -> ../../locales/translations",
+    "files": []
+  },
+  "pages/[lang]/LatestSitesBlock.js -> ../../locales/translations": {
+    "id": "pages/[lang]/LatestSitesBlock.js -> ../../locales/translations",
+    "files": []
+  },
+  "pages/[lang]/MainInviteBlock.js -> ../../locales/translations": {
+    "id": "pages/[lang]/MainInviteBlock.js -> ../../locales/translations",
+    "files": []
+  },
+  "pages/[lang]/TestimonialsBlock.js -> ../../locales/translations": {
+    "id": "pages/[lang]/TestimonialsBlock.js -> ../../locales/translations",
+    "files": []
+  },
+  "pages/_app.js -> ../components/YandexMetrika": {
+    "id": "pages/_app.js -> ../components/YandexMetrika",
+    "files": [
+      "static/chunks/_pages-dir-browser_src_components_YandexMetrika_js.js"
+    ]
+  }
+}

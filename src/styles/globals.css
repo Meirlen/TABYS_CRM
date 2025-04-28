@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+ @font-face {
+    font-family: 'BarlowBold';
+    src: url('/fonts/barlow/Barlow-Bold.ttf') format('truetype');
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'BarlowMedium';
+    src: url('/fonts/barlow/Barlow-Medium.ttf') format('truetype');
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'InterMedium';
+    src: url('/fonts/inter/InterMedium.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'InterLight';
+    src: url('/fonts/inter/InterLight.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'InterSemiBold';
+    src: url('/fonts/inter/InterSemiBold.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'InterRegular';
+    src: url('/fonts/inter/InterRegular.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'AvertaCyRegular';
+    src: url('/fonts/averta/AvertaCyRegular.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'AvertaCySemiBold';
+    src: url('/fonts/averta/AvertaCySemiBold.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'AvertaCyBold';
+    src: url('/fonts/averta/AvertaCyBold.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'Allura';
+    src: url('/fonts/averta/Allura.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'futuraPt';
+    src: url('/fonts/futuraPt/FuturaPT-Light.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'futuraPtMedium';
+    src: url('/fonts/futuraPt/FuturaPT-Medium.ttf') format('truetype');
+  }
+ @font-face {
+  font-family: 'KZ_Mon_Amour_One';
+  src: url('/fonts/kz_fon_1/KZ_Mon_Amour_One.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ_Lobster';
+  src: url('/fonts/kz_fon_1/KZ_Lobster.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ_Tangak';
+  src: url('/fonts/kz_fon_1/KZ_Tangak.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'KZGoodVibes';
+  src: url('/fonts/kz_fon_1/KZGoodVibes.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ_Jikharev';
+  src: url('/fonts/kz_fon_1/KZ_Jikharev_.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ_Monotype_corsiva';
+  src: url('/fonts/kz_fon_1/KZ_Monotype_corsiva.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ_Nautilus';
+  src: url('/fonts/kz_fon_1/KZ_Nautilus.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Kz_DessertScript_kz';
+  src: url('/fonts/kz_fon_1/Kz_DessertScript_kz.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Kz Cavaler';
+  src: url('/fonts/kz_fon_1/Kz Cavaler.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZ Boyarsky';
+  src: url('/fonts/kz_fon_1/KZ Boyarsky.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Kz_Marli_kz';
+  src: url('/fonts/kz_fon_1/Kz_Marli_kz.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'KZ_Sign_Painter_kz';
+  src: url('/fonts/kz_fon_1/KZ_Sign Painter_kz.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZPFMonumentaPro-Regular';
+  src: url('/fonts/kz_fon_1/KZPFMonumentaPro-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'KZKonungDan-Regular';
+  src: url('/fonts/kz_fon_1/KZKonungDan-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Fk Arabik.kz';
+  src: url('/fonts/kz_fon_1/Fk Arabik.kz.ttf') format('truetype');
+}
+   @font-face {
+    font-family: 'futuraPtBold';
+    src: url('/fonts/futuraPt/FuturaPT-Bold.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'allura';
+    src: url('/fonts/Allura_Great_Vibes/GreatVibes-Regular.ttf') format('truetype');
+  }
+
+
+
+
+// Добавьте эти стили в ваш CSS-файл или в компонент как styled-components
+
+// Стили для плейсхолдера видео
+.video-placeholder {
+  background: linear-gradient(-45deg, #f3f4f6, #e5e7eb, #d1d5db, #e5e7eb);
+  background-size: 400% 400%;
+  animation: gradient 3s ease infinite;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.video-placeholder__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+  text-align: center;
+}
+
+.video-placeholder__icon {
+  width: 4rem;
+  height: 4rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.video-placeholder__title {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.video-placeholder__text {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+// Анимация градиента
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Кастомный плейсхолдер для видео, который можно использовать в компоненте:
+// <div className="video-placeholder aspect-[9/16]">
+//   <div className="video-placeholder__content">
+//     <svg className="video-placeholder__icon" ... />
+//     <h4 className="video-placeholder__title">Название шаблона</h4>
+//     <p className="video-placeholder__text">Нажмите для просмотра</p>
+//   </div>
+// </div>
+
+// Анимация пульсации для кнопки проигрывания
+.play-btn-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
