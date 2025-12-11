@@ -2,7 +2,8 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --text-color: #000000;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -20,9 +21,11 @@
 }
 
 body {
-  background: var(--background);
+  background-color: white;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-color);
+
 }
  @font-face {
     font-family: 'BarlowBold';

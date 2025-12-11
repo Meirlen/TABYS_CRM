@@ -1,9 +1,84 @@
+// utils/api.js
+
+/**
+ * Fetches video templates from the API
+ * @returns {Promise<Array>} Array of template objects
+ */
+export const fetchTemplates = async () => {
+  try {
+    const response = await fetch('https://tyrasoft.kz/api/v1/canva/templates/');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching templates:', error);
+    throw error;
+  }
+};
+
+/**
+ * Formats WhatsApp link with template info
+ * @param {Object} template - Template object
+ * @returns {string} WhatsApp link with prefilled message
+ */
+export const getWhatsAppLink = (template) => {
+  const phoneNumber = '77711745741';
+  const templateId = template.template_id || template.canva_id || 'unknown';
+  const templateName = template.template_name || 'Видео шаблон';
+
+  const message = encodeURIComponent(
+    `Здравствуйте! Я хочу купить шаблон видео "${templateName}" (ID: ${templateId})`
+  );
+
+  return `https://wa.me/${phoneNumber}?text=${message}`;
+};
+
+/**
+ * Extracts YouTube video ID from a URL
+ * @param {string} url - YouTube URL (can be standard, shorts, or embed format)
+ * @returns {string|null} YouTube video ID or null if not found
+ */
+export const getYouTubeId = (url) => {
+  if (!url) return null;
+
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|shorts\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
+/**
+ * Gets YouTube thumbnail URL from video ID
+ * @param {string} url - YouTube URL
+ * @returns {string|null} URL to YouTube thumbnail or null if ID not found
+ */
+export const getYouTubeThumbnail = (url) => {
+  const videoId = getYouTubeId(url);
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+};
+
+/**
+ * Gets YouTube embed URL from video ID
+ * @param {string} url - YouTube URL
+ * @returns {string|null} URL for embedding the YouTube video
+ */
+export const getYouTubeEmbedUrl = (url) => {
+  const videoId = getYouTubeId(url);
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+};
+
+
+
 // API utility functions for making requests to the backend
 
 /**
  * Base API URL - adjust this based on your environment
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v2';
+export const API_BASE_URL = "https://saryarqajastary.kz";
 
 /**
  * Get the authentication token from localStorage

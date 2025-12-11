@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+!.next/cache/images/**
+
+# Environment variables
+.env*
+!.env.example
+
+# VSCode settings
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Build output
+build/
+dist/
+
+# Dependency directories
+bower_components/
+
+# Testing
+coverage/
+
+# Optional: Ignore local development databases, uploads, etc.
+*.sqlite
+*.local
+
+# Optional: Ignore specific IDE settings
+.idea/
+*.sw?
+
+# Optional: Ignore Mac system files
+.AppleDouble
+.LSOverride
+
+# Optional: Ignore lock files (if you're using only one package manager)
+# Uncomment the one you’re NOT using
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

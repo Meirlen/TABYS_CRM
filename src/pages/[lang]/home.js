@@ -1,207 +1,240 @@
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
-import { translations } from '../../locales/translations'; // Убедитесь, что путь корректный
+import {
+  Briefcase,
+  Award,
+  BookOpen,
+  Users,
+  ChevronRight
+} from 'react-feather';
 
-// Здесь будем импортировать компоненты по мере их добавления
-import LatestSitesBlock from './LatestSitesBlock';
-import ExamplesGalleryBlock from './ExamplesGalleryBlock';
-import ClothingTransformBlock from './ClothingTransformBlock';
-import AdvantagesBlock from './AdvantagesBlock';
-import MainInviteBlock from './MainInviteBlock';
-import TestimonialsBlock  from './TestimonialsBlock';
-import Footer from '../../components/Footer'; // Импортируем компонент Footer
+// Импортируем переводы из локалей
+import { translations } from '../../locales/translations';
 
-// и так далее...
-
-export default function HomePage({ lang: serverLang, translations: serverTranslations }) {
+const Home = () => {
   const router = useRouter();
-  const { lang: clientLang } = router.query;
+  const { lang } = router.query;
 
-  // Используем язык из серверных пропсов или из client-side маршрутизации
-  const [currentLang, setCurrentLang] = useState(serverLang || 'kz');
-  // Используем переводы из серверных пропсов или из импортированного файла
-  const [t, setT] = useState(serverTranslations || {});
+  // Инициализируем язык
+  const [currentLang, setCurrentLang] = useState(
+    typeof lang === 'string' && ['kz', 'ru', 'en'].includes(lang)
+      ? lang
+      : 'kz'
+  );
+
+  // Инициализируем переводы
+  const [t, setT] = useState(translations[currentLang] || {});
 
   useEffect(() => {
-    // Обновляем язык при клиентской навигации (если меняются query-параметры)
-    if (clientLang && clientLang !== currentLang) {
-      const validLang = ['kz', 'ru'].includes(clientLang) ? clientLang : 'kz';
+    if (typeof lang === 'string' && lang !== currentLang) {
+      const validLang = ['kz', 'ru', 'en'].includes(lang) ? lang : 'kz';
       setCurrentLang(validLang);
-
-      // Если указан неправильный язык, перенаправляем на правильный URL
-      if (clientLang !== validLang) {
-        router.replace(`/${validLang}/home`);
-        return;
-      }
-
-      // Используем существующие переводы
-      if (translations && translations[validLang]) {
-        setT(translations[validLang]);
-      }
-
-      // Сохраняем выбранный язык в localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('language', validLang);
-      }
+      setT(translations[validLang] || {});
     }
-  }, [clientLang, currentLang, router]);
+  }, [lang, currentLang]);
 
-  // Функция для перехода на соответствующую страницу с проверкой авторизации
-  const handleCreateClick = (route) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // Если пользователь не авторизован, перенаправляем на страницу логина
-      // с callbackUrl, указывающим куда вернуться после авторизации
-      router.push({
-        pathname: `/${currentLang}/login`,
-        query: { callbackUrl: `/${currentLang}/invite_type` }
-      });
-    } else {
-      // Если пользователь авторизован, сразу переходим на страницу категорий
-      router.push(`/${currentLang}${route}`);
+  const langPrefix = `/${currentLang}`;
+
+  // Карточки услуг
+  const serviceCards = [
+    {
+      title: 'Найти работу',
+      description: 'Вакансии для лиц с ограниченными возможностями',
+      icon: <Briefcase size={32} className="text-blue-500" />,
+      link: `${langPrefix}/vacancies`,
+      color: 'bg-blue-50 hover:bg-blue-100',
+      buttonColor: 'text-blue-600 hover:bg-blue-600 hover:text-white'
+    },
+    {
+      title: 'Получить сертификат',
+      description: 'Сертификация навыков и квалификации',
+      icon: <Award size={32} className="text-teal-500" />,
+      link: `${langPrefix}/certificates`,
+      color: 'bg-teal-50 hover:bg-teal-100',
+      buttonColor: 'text-teal-600 hover:bg-teal-600 hover:text-white'
+    },
+    {
+      title: 'Пройти обучение',
+      description: 'Электронные курсы для развития навыков',
+      icon: <BookOpen size={32} className="text-purple-500" />,
+      link: `${langPrefix}/courses`,
+      color: 'bg-purple-50 hover:bg-purple-100',
+      buttonColor: 'text-purple-600 hover:bg-purple-600 hover:text-white'
+    },
+    {
+      title: 'Найти эксперта',
+      description: 'Консультации специалистов в разных областях',
+      icon: <Users size={32} className="text-orange-500" />,
+      link: `${langPrefix}/experts/all`,
+      color: 'bg-orange-50 hover:bg-orange-100',
+      buttonColor: 'text-orange-600 hover:bg-orange-600 hover:text-white'
     }
-  };
-
-  // Функция для получения переводов по вложенным ключам (аналог t из useSimpleTranslation)
-  const getTranslation = (key) => {
-    try {
-      const keys = key.split('.');
-      let result = t;
-
-      for (const k of keys) {
-        if (!result || result[k] === undefined) {
-          console.warn(`Translation missing: ${key}`);
-          return key;
-        }
-        result = result[k];
-      }
-
-      return typeof result === 'string' ? result : key;
-    } catch (e) {
-      console.error(`Error getting translation for key: ${key}`, e);
-      return key;
-    }
-  };
+  ];
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
+    <>
+      <Head>
+        <title>Табыс - Возможности для всех</title>
+        <meta name="description" content="Платформа для лиц с ограниченными возможностями. Курсы, работа, сертификаты и экспертная поддержка." />
+      </Head>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="md:w-1/2 mb-6 md:mb-0">
-              <div className="flex items-center mb-4">
-                <span className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">{getTranslation('newPage.badge.number1')}</span>
-                <span className="ml-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">{getTranslation('newPage.badge.count')}</span>
-              </div>
-
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
-                {getTranslation('newPage.title')}
-                <span className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">{getTranslation('newPage.subtitle')}</span>
-                {getTranslation('newPage.titleEnd')}
+      {/* Главный баннер с видео */}
+      <section className="relative bg-gradient-to-r from-teal-500 to-blue-600 text-white">
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                Раскройте свой потенциал с <span className="text-yellow-300">TABYS</span>
               </h1>
-
-              <p className="text-gray-600 mb-6 text-lg">
-                {getTranslation('newPage.description')}
+              <p className="text-lg md:text-xl opacity-90">
+                Платформа возможностей для людей с особыми потребностями.
+                Образование, трудоустройство и поддержка на каждом шагу вашего пути.
               </p>
+              <div className="flex flex-wrap gap-4 pt-2">
+                <Link href={`${langPrefix}/courses`} legacyBehavior>
+                  <a className="px-6 py-3 bg-white text-teal-600 font-medium rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                    Начать обучение
+                  </a>
+                </Link>
+                <Link href={`${langPrefix}/experts/all`} legacyBehavior>
+                  <a className="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-lg hover:bg-white hover:text-teal-600 transition duration-300">
+                    Найти эксперта
+                  </a>
+                </Link>
+              </div>
+            </div>
 
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => handleCreateClick('/invite_type')}
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg"
-                >
-                  {getTranslation('newPage.startButton')}
-                </button>
+            {/* YouTube Видео контейнер */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm">
+              <div className="aspect-video relative">
+                <iframe
+                  src="https://www.youtube.com/embed/oUpdEYBWUWk?rel=0&showinfo=0&controls=1"
+                  title="Промо-видео Табыс"
+                  className="absolute top-0 left-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Статистика */}
-          <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-200">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-gray-800">1000+</div>
-              <div className="text-sm text-gray-600">{getTranslation('newPage.stats.invitations')}</div>
+        {/* Волнообразный разделитель */}
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-0 transform translate-y-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="text-white w-full h-16 md:h-24">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="currentColor"></path>
+          </svg>
+        </div>
+      </section>
+
+      {/* Секция услуг */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Наши возможности</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Мы создали платформу, которая предоставляет доступные инструменты
+              для развития, обучения и трудоустройства.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {serviceCards.map((card, index) => (
+              <div
+                key={index}
+                className={`rounded-xl p-6 transition-all duration-300 ${card.color} group`}
+              >
+                <div className="mb-4">{card.icon}</div>
+                <h3 className="text-xl font-bold mb-2">{card.title}</h3>
+                <p className="text-gray-700 mb-4">{card.description}</p>
+                <Link href={card.link} legacyBehavior>
+                  <a className={`inline-flex items-center font-medium rounded-lg px-4 py-2 transition-colors duration-300 border border-current ${card.buttonColor}`}>
+                    Подробнее
+                    <ChevronRight size={16} className="ml-1" />
+                  </a>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Секция о нас */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="relative rounded-2xl overflow-hidden shadow-lg">
+                <div className="aspect-[4/3]">
+                  <img
+                    src="/images/about_us.jpg"
+                    alt="Сообщество Табыс"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                  <div className="p-6 text-white">
+                    <span className="bg-teal-500 px-3 py-1 rounded-full text-sm font-medium">
+                      Наше сообщество
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-gray-800">98%</div>
-              <div className="text-sm text-gray-600">{getTranslation('newPage.stats.clients')}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-gray-800">5 {getTranslation('newPage.stats.min')}</div>
-              <div className="text-sm text-gray-600">{getTranslation('newPage.stats.time')}</div>
+
+            <div className="space-y-6">
+              <div>
+                <span className="text-teal-600 font-medium">О проекте</span>
+                <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">Наша миссия</h2>
+              </div>
+              <p className="text-gray-700">
+                Миссия проекта Табыс — создать инклюзивную среду, где каждый человек
+                с особыми потребностями может реализовать свой потенциал. Мы стремимся
+                разрушить барьеры, препятствующие полноценному участию в образовательной
+                и профессиональной деятельности.
+              </p>
+              <p className="text-gray-700">
+                Наша платформа объединяет возможности обучения, получения сертификатов,
+                трудоустройства и консультации экспертов в различных областях,
+                чтобы каждый участник мог построить свой путь к успеху.
+              </p>
+              <Link href={`${langPrefix}/about`} legacyBehavior>
+                <a className="inline-flex items-center text-teal-600 font-medium hover:text-teal-700">
+                  Узнать больше о нас
+                  <ChevronRight size={16} className="ml-1" />
+                </a>
+              </Link>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Здесь будем добавлять компоненты */}
-        <LatestSitesBlock />
-        <ExamplesGalleryBlock />
-        <ClothingTransformBlock />
-        <AdvantagesBlock />
-        <MainInviteBlock />
-        <TestimonialsBlock />
-
-
-
-        {/* Панель поддержки */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="mb-4 md:mb-0 text-center md:text-left">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{getTranslation('newPage.support.title')}</h3>
-              <p className="text-gray-600">{getTranslation('newPage.support.subtitle')}</p>
-            </div>
-
-            <a
-              href="https://wa.me/77711745741"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-              </svg>
-              {getTranslation('newPage.support.contactButton')}
-            </a>
+      {/* Блок призыва к действию */}
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Готовы начать?</h2>
+          <p className="text-xl opacity-90 max-w-3xl mx-auto mb-8">
+            Присоединяйтесь к нашему сообществу прямо сейчас и откройте
+            новые возможности для развития и трудоустройства.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href={`${langPrefix}/register`} legacyBehavior>
+              <a className="px-8 py-4 bg-white text-teal-600 font-medium rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                Зарегистрироваться
+              </a>
+            </Link>
+            <Link href={`${langPrefix}/contact`} legacyBehavior>
+              <a className="px-8 py-4 bg-transparent border-2 border-white text-white font-medium rounded-lg hover:bg-white hover:text-teal-600 transition duration-300">
+                Связаться с нами
+              </a>
+            </Link>
           </div>
         </div>
-      </div>
-
-      <Footer />
-
-    </div>
+      </section>
+    </>
   );
-}
+};
 
-// Используем getServerSideProps для получения параметра lang на сервере
-export async function getServerSideProps(context) {
-  // Получаем параметр lang из URL
-  const { lang } = context.params;
-
-  // Проверяем, что язык валидный (убрали английский)
-  const validLang = ['kz', 'ru'].includes(lang) ? lang : 'kz';
-
-  // Если указан неправильный язык, делаем редирект на правильный URL
-  if (lang !== validLang) {
-    return {
-      redirect: {
-        destination: `/${validLang}/home`,
-        permanent: false,
-      },
-    };
-  }
-
-  // Получаем переводы для этого языка
-  const langTranslations = translations[validLang] || translations['kz'];
-
-  // Возвращаем данные в компонент
-  return {
-    props: {
-      lang: validLang,
-      translations: langTranslations
-    }
-  };
-}
+export default Home;

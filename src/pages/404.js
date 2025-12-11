@@ -12,7 +12,7 @@ export default function Custom404() {
     if (path.startsWith('/ru')) lang = 'ru';
     else if (path.startsWith('/en')) lang = 'en';
 
-    router.replace(`/${lang}/home`);
+    router.replace(`/${lang}/admin/dashboard`);
   }, []);
 
   return null; // ничего не показываем

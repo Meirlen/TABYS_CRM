@@ -111,7 +111,7 @@ const handleLogin = async () => {
   }
 
   try {
-    const response = await axios.post('https://tyrasoft.kz/api/v1/user_legendo/login', {
+    const response = await axios.post(API_BASE_URL + '/api/v2/auth/login', {
       phone_number: digitsOnly,
     });
 
@@ -132,7 +132,7 @@ const handleLogin = async () => {
       router.push(callbackUrl);
     } else {
       // Иначе перенаправляем на домашнюю страницу
-      router.push(`/${lang}/home`);
+      router.push(`/${lang}/admin/dashboard`);
     }
   } catch (err: any) {
     console.error('Login error:', err);

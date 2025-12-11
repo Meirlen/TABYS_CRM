@@ -5,13 +5,14 @@ import {
   Menu,
   X,
   Home,
-  Clock,
-  Info,
-  CreditCard,
-  Globe,
   BookOpen,
-  Volume2,
   Users,
+  Briefcase,
+  Award,
+  Monitor,
+  HelpCircle,
+  Globe,
+  LogIn,
 } from 'react-feather';
 
 // Импортируем переводы из локалей
@@ -31,6 +32,9 @@ const Navigation = () => {
   // Текущий путь: /[lang]/about, /[lang]/home и т.п.
   const pathname = router.pathname;
 
+  // Состояние авторизации
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
   // Инициализируем язык
   const [currentLang, setCurrentLang] = useState(
     typeof lang === 'string' && ['kz', 'ru', 'en'].includes(lang)
@@ -39,6 +43,12 @@ const Navigation = () => {
   );
   // Инициализируем переводы
   const [t, setT] = useState(translations[currentLang] || {});
+
+  // Проверка авторизации при загрузке
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    setIsAuthorized(!!token);
+  }, []);
 
   useEffect(() => {
     if (typeof lang === 'string' && lang !== currentLang) {
@@ -54,80 +64,68 @@ const Navigation = () => {
   // Префикс для ссылок вида /kz/home, /ru/home и т.п.
   const langPrefix = `/${currentLang}`;
 
-  // Пример функции для перехода
-  const handleCreateClick = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (!token) {
-      router.push(`/${currentLang}/login`);
-    } else {
-      window.location.href = 'https://wa.me/77074256724';
-    }
-  };
-
-  // Навигационные пункты
+  // Навигационные пункты с обновленными иконками
   const navItems = [
     {
       path: `${langPrefix}/home`,
-      label: t.navigation?.home || 'Home',
+      label: t.navigation?.home || 'Главная',
       icon: <Home size={18} className="mr-2" />,
+      requiresAuth: false,
     },
     {
-      path: `${langPrefix}/my_sites`,
-      label: t.navigation?.history || 'History',
-      icon: <Clock size={18} className="mr-2" />,
-    },
-    {
-      path: `${langPrefix}/PackageCalculator`,
-      label: t.navigation?.partner || 'Partner',
+      path: `${langPrefix}/experts/all`,
+      label: t.navigation?.experts || 'Эксперты',
       icon: <Users size={18} className="mr-2" />,
+      requiresAuth: false,
     },
     {
-      path: `${langPrefix}/blog`,
-      label: 'Блог',
-      icon: <BookOpen size={18} className="mr-2" />,
+      path: `${langPrefix}/vacancies`,
+      label: t.navigation?.vacancies || 'Вакансии',
+      icon: <Briefcase size={18} className="mr-2" />,
+      requiresAuth: false,
     },
     {
-      path: `${langPrefix}/about`,
-      label: t.navigation?.about || 'About',
-      icon: <Info size={18} className="mr-2" />,
+      path: `${langPrefix}/events`,
+      label: t.navigation?.events || 'События',
+      icon: <HelpCircle size={18} className="mr-2" />,
+      requiresAuth: false,
+    },
+    {
+      path: `${langPrefix}/certificates`,
+      label: t.navigation?.certificates || 'Сертификация',
+      icon: <Award size={18} className="mr-2" />,
+      requiresAuth: true, // Требует авторизации
+    },
+    {
+      path: `${langPrefix}/courses`,
+      label: t.navigation?.courses || 'Электронные курсы',
+      icon: <Monitor size={18} className="mr-2" />,
+      requiresAuth: true, // Требует авторизации
     },
   ];
-
-  // Баланс пользователя
-  const [balance, setBalance] = useState(null);
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        if (!token) {
-          setBalance(null);
-          return;
-        }
-        // API-запрос для получения баланса
-        const response = await fetch('https://tyrasoft.kz/api/v1/balance', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setBalance(data.balance);
-        } else {
-          console.error('Не удалось получить баланс');
-          setBalance(null);
-        }
-      } catch (error) {
-        console.error('Ошибка при получении баланса:', error);
-        setBalance(null);
-      }
-    };
-
-    fetchBalance();
-  }, []);
 
   // Состояния для раскрытия/закрытия меню
   const [isOpen, setIsOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isMobileLangOpen, setIsMobileLangOpen] = useState(false);
+
+  // Обработчик перехода на страницу логина
+  const handleLogin = () => {
+    router.push(`${langPrefix}/login?returnUrl=${encodeURIComponent(router.asPath)}`);
+  };
+
+  // Обработчик навигации для пунктов меню, требующих авторизации
+  const handleNavigationClick = (item, e) => {
+    if (item.requiresAuth && !isAuthorized) {
+      e.preventDefault();
+      // Перенаправляем на страницу логина с returnUrl для возврата после авторизации
+      router.push(`${langPrefix}/login?returnUrl=${encodeURIComponent(item.path)}`);
+    } else {
+      // Если пользователь авторизован или пункт не требует авторизации,
+      // просто переходим по указанному пути
+      router.push(item.path);
+    }
+  };
 
   // Закрытие при клике вне меню
   useEffect(() => {
@@ -189,7 +187,7 @@ const Navigation = () => {
     if (['kz', 'ru', 'en'].includes(langCode)) {
       setCurrentLang(langCode);
       setT(translations[langCode] || {});
-      router.push(`/${langCode}/home`);
+      router.push(`/${langCode}${pathname.replace(/^\/[^\/]+/, '')}`);
       if (typeof window !== 'undefined') {
         localStorage.setItem('language', langCode);
       }
@@ -203,7 +201,7 @@ const Navigation = () => {
     if (['kz', 'ru', 'en'].includes(langCode)) {
       setCurrentLang(langCode);
       setT(translations[langCode] || {});
-      router.push(`/${langCode}/home`);
+      router.push(`/${langCode}${pathname.replace(/^\/[^\/]+/, '')}`);
       if (typeof window !== 'undefined') {
         localStorage.setItem('language', langCode);
       }
@@ -213,46 +211,75 @@ const Navigation = () => {
   return (
     <>
       {/* Десктопное меню */}
-      <nav className="bg-white shadow-sm sticky top-0 z-30 hidden sm:block">
-        <div className="container mx-auto px-4 py-4">
+      <nav className="bg-white shadow-md sticky top-0 z-30 hidden sm:block">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Логотип */}
             <div className="flex items-center">
               <Link href={`${langPrefix}/home`} legacyBehavior>
                 <a className="flex items-center">
                   <div className="text-2xl font-bold">
-                    <span className="bg-gradient-to-r from-[#3875F6] to-[#00B074] text-transparent bg-clip-text">
-                      SHAQYRU
+                    <span className="bg-gradient-to-r from-teal-500 to-blue-600 text-transparent bg-clip-text">
+                      TABYS
                     </span>
-                    <span className="text-[#3875F6]">24</span>
                   </div>
                 </a>
               </Link>
             </div>
 
             {/* Навигационные ссылки */}
-            <div className="hidden sm:flex items-center space-x-2">
+            <div className="hidden sm:flex items-center space-x-1">
               {navItems.map((item) => (
-                <Link href={item.path} key={item.path} legacyBehavior>
-                  <a
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                      isActive(item.path)
-                        ? 'bg-blue-50 text-[#3875F6]'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </a>
-                </Link>
+                <div key={item.path}>
+                  {item.requiresAuth ? (
+                    // Для пунктов, требующих авторизации, используем обработчик
+                    <a
+                      href={item.path}
+                      onClick={(e) => handleNavigationClick(item, e)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
+                        isActive(item.path)
+                          ? 'bg-teal-50 text-teal-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-teal-600'
+                      }`}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </a>
+                  ) : (
+                    // Для обычных пунктов используем Link
+                    <Link href={item.path} legacyBehavior>
+                      <a
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
+                          isActive(item.path)
+                            ? 'bg-teal-50 text-teal-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-teal-600'
+                        }`}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </a>
+                    </Link>
+                  )}
+                </div>
               ))}
+
+              {/* Кнопка Войти (только для неавторизованных) */}
+              {!isAuthorized && (
+                <button
+                  onClick={handleLogin}
+                  className="ml-2 px-3 py-2 bg-white text-teal-600 hover:text-teal-700 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-colors duration-300 flex items-center"
+                >
+                  <LogIn size={18} className="mr-2" />
+                  {t.navigation?.login || 'Войти'}
+                </button>
+              )}
 
               {/* Селектор языка (десктоп) */}
               <div className="relative ml-2">
                 <button
                   id="lang-button"
                   onClick={toggleLangDropdown}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <Globe size={18} />
                   <img
@@ -263,21 +290,18 @@ const Navigation = () => {
                     alt="Selected language"
                     className="w-5 h-5 ml-1"
                   />
-                  <span className="ml-1">
-                    {languages.find((l) => l.code === currentLang)?.label || 'Қазақша'}
-                  </span>
                 </button>
                 {isLangOpen && (
                   <div
                     id="lang-dropdown"
-                    className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                    className="absolute right-0 mt-2 w-40 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden"
                   >
                     <div className="py-1">
                       {languages.map((langItem) => (
                         <button
                           key={langItem.code}
                           onClick={() => handleLanguageChange(langItem.code)}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-600"
                         >
                           <img
                             src={langItem.flag}
@@ -292,43 +316,21 @@ const Navigation = () => {
                 )}
               </div>
             </div>
-
-            {/* Баланс и кнопка пополнения (десктоп) */}
-            <div className="hidden sm:flex items-center">
-              <div className="mr-4 text-sm text-gray-700">
-                <span className="font-medium">{t.navigation?.balance}:</span>{' '}
-                {balance !== null ? (
-                  <span className="font-bold text-[#3875F6]">
-                    {balance.toFixed(0)} ₸
-                  </span>
-                ) : (
-                  <span className="text-gray-500">—</span>
-                )}
-              </div>
-              <button
-                onClick={handleCreateClick}
-                className="bg-[#3875F6] hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors flex items-center"
-              >
-                <CreditCard size={16} className="mr-2" />
-                {t.navigation?.topUp}
-              </button>
-            </div>
           </div>
         </div>
       </nav>
 
       {/* Мобильное меню */}
-      <nav className="bg-white shadow-sm sm:hidden sticky top-0 z-30">
+      <nav className="bg-white shadow-md sm:hidden sticky top-0 z-30">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Логотип */}
             <Link href={`${langPrefix}/home`} legacyBehavior>
               <a className="flex items-center">
                 <div className="text-xl font-bold">
-                  <span className="bg-gradient-to-r from-[#3875F6] to-[#00B074] text-transparent bg-clip-text">
-                    SHAQYRU
+                  <span className="bg-gradient-to-r from-teal-500 to-blue-600 text-transparent bg-clip-text">
+                    TABYS
                   </span>
-                  <span className="text-[#3875F6]">24</span>
                 </div>
               </a>
             </Link>
@@ -339,7 +341,7 @@ const Navigation = () => {
                 <button
                   id="mobile-lang-button"
                   onClick={toggleMobileLangDropdown}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+                  className="p-2 rounded-lg text-gray-600 hover:text-teal-600 hover:bg-gray-50 focus:outline-none"
                 >
                   <img
                     src={
@@ -353,14 +355,14 @@ const Navigation = () => {
                 {isMobileLangOpen && (
                   <div
                     id="mobile-lang-dropdown"
-                    className="absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                    className="absolute right-0 mt-2 w-32 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden"
                   >
                     <div className="py-1">
                       {languages.map((langItem) => (
                         <button
                           key={langItem.code}
                           onClick={() => handleMobileLanguageChange(langItem.code)}
-                          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-600"
                         >
                           <img
                             src={langItem.flag}
@@ -375,21 +377,10 @@ const Navigation = () => {
                 )}
               </div>
 
-              <div className="mr-3 text-sm">
-                <span className="font-medium text-gray-700">
-                  {balance !== null ? (
-                    <span className="font-bold text-[#3875F6]">
-                      {balance.toFixed(0)} ₸
-                    </span>
-                  ) : (
-                    <span className="text-gray-500">—</span>
-                  )}
-                </span>
-              </div>
               <button
                 id="hamburger-button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+                className="p-2 rounded-lg text-gray-600 hover:text-teal-600 hover:bg-gray-50 focus:outline-none"
               >
                 {isOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -404,30 +395,53 @@ const Navigation = () => {
           >
             <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
               {navItems.map((item) => (
-                <Link href={item.path} key={item.path} legacyBehavior>
-                  <a
-                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${
-                      isActive(item.path)
-                        ? 'bg-blue-50 text-[#3875F6]'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </a>
-                </Link>
+                <div key={item.path}>
+                  {item.requiresAuth ? (
+                    // Для пунктов, требующих авторизации, используем обработчик
+                    <a
+                      href={item.path}
+                      className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors flex items-center ${
+                        isActive(item.path)
+                          ? 'bg-teal-50 text-teal-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-teal-600'
+                      }`}
+                      onClick={(e) => {
+                        setIsOpen(false);
+                        handleNavigationClick(item, e);
+                      }}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </a>
+                  ) : (
+                    // Для обычных пунктов используем Link
+                    <Link href={item.path} legacyBehavior>
+                      <a
+                        className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors flex items-center ${
+                          isActive(item.path)
+                            ? 'bg-teal-50 text-teal-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-teal-600'
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </a>
+                    </Link>
+                  )}
+                </div>
               ))}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleCreateClick();
-                }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-[#3875F6] hover:bg-blue-600 text-white transition-colors flex items-center"
-              >
-                <CreditCard size={18} className="mr-2" />
-                {t.navigation?.topUp}
-              </button>
+
+              {/* Кнопка Войти для мобильного меню (только для неавторизованных) */}
+              {!isAuthorized && (
+                <button
+                  onClick={handleLogin}
+                  className="w-full px-3 py-2 bg-white text-teal-600 hover:text-teal-700 rounded-lg text-base font-medium shadow-md hover:shadow-lg transition-colors duration-300 flex items-center"
+                >
+                  <LogIn size={18} className="mr-2" />
+                  {t.navigation?.login || 'Войти'}
+                </button>
+              )}
             </div>
           </div>
         )}
