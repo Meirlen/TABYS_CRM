@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { translations } from '../../../locales/translations';
 import Footer from '../../../components/Footer';
 import HeaderBack from '../../../components/HeaderBack';
-import CollaborationModal from './CollaborationModal';
+import CollaborationModal from '../../../components/CollaborationModal';
 import { EXPERTS_API } from '../../../utils/apiConfig';
+import { FileText } from 'lucide-react'; // Добавьте эту строку
+
 import {
   User,
   MapPin,
@@ -355,7 +357,7 @@ export default function ExpertDetail({ lang: serverLang, translations: serverTra
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-6 md:p-8">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                <Users size={20} className="text-teal-600 mr-3" />
+                <User size={20} className="text-teal-600 mr-3" />
                 {getTranslation('expert.similarExperts', 'Похожие эксперты')}
               </h2>
 

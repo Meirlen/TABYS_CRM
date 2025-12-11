@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EXPERTS_API } from '../../utils/apiConfig'; // Импортируем конфигурацию API
+import { EXPERTS_API } from '../utils/apiConfig'; // Импортируем конфигурацию API
 
 const CollaborationModal = ({ expertId, expertName, onClose, getTranslation, currentLang }) => {
   const [formData, setFormData] = useState({

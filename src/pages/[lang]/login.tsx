@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
+export const API_BASE_URL = "https://saryarqajastary.kz";
 
 // Define the translations interface
 interface Translations {

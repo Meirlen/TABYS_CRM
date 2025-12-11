@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CoursesAPI } from '../../../api/coursesAPI';
+import { FileText } from 'lucide-react'; // Добавьте эту строку
+
 import {
   ArrowLeft,
   Clock,

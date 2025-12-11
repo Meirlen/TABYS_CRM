@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { EXPERTS_API } from '../../../utils/apiConfig'; // Импортируем конфигурацию API
+import { EXPERTS_API } from '../../../../utils/apiConfig'; // Импортируем конфигурацию API
 import AdminLayout from '../../../../components/layouts/AdminLayout';
 
 // Принимаем currentLang, если он нужен для чего-то (например, отправка на API или формирование URL)

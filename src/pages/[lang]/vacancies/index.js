@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { VACANCIES_API, appendQueryParams } from '../../../utils/apiConfig';
 import { formatDate } from '../../../utils/dateUtils';
-import AdminLayout from '../../../../components/layouts/AdminLayout';
+import AdminLayout from '../../../components/layouts/AdminLayout';
 
 import {
   MapPin,

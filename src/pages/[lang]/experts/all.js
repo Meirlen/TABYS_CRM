@@ -3,8 +3,6 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { translations } from '../../../locales/translations'; // Убедитесь, что путь корректный
 import Footer from '../../../components/Footer'; // Убедитесь, что путь корректный
-import ExpertsList from './ExpertsList'; // Компонент списка
-import ExpertFilter from './ExpertFilter'; // Компонент фильтра
 import { Users, Search } from 'react-feather';
 import AdminLayout from '../../../components/layouts/AdminLayout';
 
@@ -102,18 +100,9 @@ export default function ExpertsPage({ lang: serverLang, translations: serverTran
 
 
         <div className="mb-8">
-          <ExpertFilter
-            onFilterChange={handleFilterChange}
-            getTranslation={getTranslation}
-            currentLang={currentLang}
-          />
+
         </div>
 
-        <ExpertsList
-          filters={filters}
-          getTranslation={getTranslation}
-          currentLang={currentLang}
-        />
       </div>
 
 

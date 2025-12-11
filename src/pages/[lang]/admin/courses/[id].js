@@ -4,6 +4,7 @@ import Link from 'next/link';
 import AdminLayout from '../../../../components/layouts/AdminLayout';
 import { CoursesAPI } from '../../../../api/coursesAPI';
 
+
 const CourseDetail = () => {
   const router = useRouter();
   const { id } = router.query;

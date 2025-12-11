@@ -82,7 +82,7 @@ export const API_BASE_URL = "https://saryarqajastary.kz";
 
 /**
  * Get the authentication token from localStorage
- * @returns {string|null} The auth token or null if not found
+ * @returns тзь{string|null} The auth token or null if not found
  */
 export const getToken = () => {
   if (typeof window !== 'undefined') {
