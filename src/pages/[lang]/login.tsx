@@ -1,86 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { GetServerSideProps } from 'next';
-export const API_BASE_URL = "https://saryarqajastary.kz";
+import React, { useState } from 'react';
+import { Eye, EyeOff, Lock, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 
-// Define the translations interface
-interface Translations {
-  title: string;
-  subtitle: string;
-  phoneLabel: string;
-  phoneHelper: string;
-  loginButton: string;
-  loadingText: string;
-  errorEmptyPhone: string;
-  errorInvalidPhone: string;
-  errorWrongNumber: string;
-  errorGeneric: string;
-}
-
-interface LoginProps {
-  translations: Translations;
-}
-
-// This function will run on the server for each request
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  // Get the language from the URL
-  const lang = params?.lang || 'kk'; // Default to Kazakh if not specified
-
-  // In a real app, you would load translations from a file or API
-  // Here we're just hardcoding Kazakh and Russian translations
-  const translations = {
-    kk: {
-      title: 'Shaqyru24',
-      subtitle: 'Сайтқа кіру үшін нөміріңізді енгізіңіз',
-      phoneLabel: 'WhatsApp нөміріңіз:',
-      phoneHelper: 'Маңызды: Өзіңіздің WhatsApp нөміріңізді көрсетіңіз, өйткені барлық материалдар сол нөмірге жіберіледі.',
-      loginButton: 'Кіру',
-      loadingText: 'Кіру...',
-      errorEmptyPhone: 'Номер телефоныңызды енгізіңіз.',
-      errorInvalidPhone: 'Нөмір дұрыс емес.',
-      errorWrongNumber: 'Нөмір қате.',
-      errorGeneric: 'Кіру кезінде қате.'
-    },
-    ru: {
-      title: 'Shaqyru24',
-      subtitle: 'Введите ваш номер для входа на сайт',
-      phoneLabel: 'Ваш WhatsApp номер:',
-      phoneHelper: 'Важно: Укажите ваш WhatsApp номер, так как все материалы будут отправлены на этот номер.',
-      loginButton: 'Войти',
-      loadingText: 'Вход...',
-      errorEmptyPhone: 'Введите номер телефона.',
-      errorInvalidPhone: 'Неверный номер.',
-      errorWrongNumber: 'Неверный номер.',
-      errorGeneric: 'Ошибка при входе.'
-    }
-  };
-
-  // Validate lang parameter
-  const validLang = (lang as string) in translations ? (lang as string) : 'kk';
-
-  // Return the props for the component
-  return {
-    props: {
-      translations: translations[validLang as keyof typeof translations]
-    }
-  };
-};
-
-const Login: React.FC<LoginProps> = ({ translations }) => {
+const TabysAdminLogin = () => {
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const { lang } = router.query;
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  // Function to format the phone number
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digit characters
+  const API_BASE_URL = "https://saryarqajastary.kz";
+  const HARDCODED_PASSWORD = '87qy128!';
+
+  // Форматирование номера телефона
+  const formatPhoneNumber = (value) => {
     const phoneNumber = value.replace(/\D/g, '');
 
-    // Format the phone number
     if (phoneNumber.length === 0) return '';
     if (phoneNumber.length <= 1) return `+${phoneNumber}`;
     if (phoneNumber.length <= 4) return `+${phoneNumber.slice(0, 1)} (${phoneNumber.slice(1)}`;
@@ -89,339 +24,267 @@ const Login: React.FC<LoginProps> = ({ translations }) => {
     return `+${phoneNumber.slice(0, 1)} (${phoneNumber.slice(1, 4)}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 9)}-${phoneNumber.slice(9, 11)}`;
   };
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoneChange = (e) => {
     const formattedPhone = formatPhoneNumber(e.target.value);
     setPhone(formattedPhone);
   };
-const handleLogin = async () => {
-  setLoading(true);
-  setError(null);
 
-  if (!phone) {
-    setError(translations.errorEmptyPhone);
-    setLoading(false);
-    return;
-  }
+  const handleLogin = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess(false);
 
-  // Проверка номера телефона
-  const digitsOnly = phone.replace(/\D/g, '');
-  if (digitsOnly.length < 11) {
-    setError(translations.errorInvalidPhone);
-    setLoading(false);
-    return;
-  }
+    // Валидация полей
+    if (!phone) {
+      setError('Введите номер телефона');
+      setLoading(false);
+      return;
+    }
 
-  try {
-    const response = await axios.post(API_BASE_URL + '/api/v2/auth/login', {
-      phone_number: digitsOnly,
-    });
+    if (!password) {
+      setError('Введите пароль');
+      setLoading(false);
+      return;
+    }
 
-    const token = response.data?.data?.token;
-    if (token) {
-      // Сохраняем токен и номер телефона в localStorage
-      if (typeof window !== 'undefined') {
+    // Проверка пароля
+    if (password !== HARDCODED_PASSWORD) {
+      setError('Неверный пароль');
+      setLoading(false);
+      return;
+    }
+
+    // Проверка длины номера
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (digitsOnly.length < 11) {
+      setError('Неверный формат номера');
+      setLoading(false);
+      return;
+    }
+
+    // Запрос на сервер
+    try {
+      const response = await fetch(API_BASE_URL + '/api/v2/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone_number: digitsOnly,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403 || response.status === 401) {
+          setError('Номер не найден в системе');
+        } else {
+          const detail = data?.detail || 'Ошибка при входе';
+          setError(detail);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const token = data?.data?.token;
+      if (token) {
+        // Сохраняем токен и номер телефона
         localStorage.setItem('token', token);
         localStorage.setItem('phoneNumber', digitsOnly);
+
+        setSuccess(true);
+        setError('');
+
+        // Перенаправление через 1 секунду
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard';
+        }, 1000);
+      } else {
+        setError('Не удалось получить токен');
+        setLoading(false);
       }
-    }
-
-    // Получаем параметр callbackUrl из URL, если он есть
-    const { callbackUrl } = router.query;
-
-    // Если есть callbackUrl, перенаправляем туда
-    if (callbackUrl && typeof callbackUrl === 'string') {
-      router.push(callbackUrl);
-    } else {
-      // Иначе перенаправляем на домашнюю страницу
-      router.push(`/${lang}/admin/dashboard`);
-    }
-  } catch (err: any) {
-    console.error('Login error:', err);
-    if (err.response?.status === 403 || err.response?.status === 401) {
-      setError(translations.errorWrongNumber);
-    } else {
-      const detail = err.response?.data?.detail;
-      setError(detail || translations.errorGeneric);
-    }
-  } finally {
-    setLoading(false);
-  }
-};
-  // Simple dynamic icon components
-  const PhoneIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}
-    >
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-    </svg>
-  );
-
-  const AlertIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ flexShrink: 0, marginRight: '8px', color: '#ef4444' }}
-    >
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="12" y1="8" x2="12" y2="12"></line>
-      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-    </svg>
-  );
-
-  const LoaderIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{
-        marginRight: '8px',
-        animation: 'spin 1s linear infinite',
-      }}
-    >
-      <line x1="12" y1="2" x2="12" y2="6"></line>
-      <line x1="12" y1="18" x2="12" y2="22"></line>
-      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-      <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-      <line x1="2" y1="12" x2="6" y2="12"></line>
-      <line x1="18" y1="12" x2="22" y2="12"></line>
-      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-      <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-    </svg>
-  );
-
-  // Styles
-  const styles = {
-    container: {
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '20px',
-      fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-    },
-    formContainer: {
-      backgroundColor: 'white',
-      padding: '30px',
-      borderRadius: '12px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-      width: '100%',
-      maxWidth: '400px',
-    },
-    header: {
-      textAlign: 'center' as const,
-      marginBottom: '24px',
-    },
-    logo: {
-      fontSize: '28px',
-      fontWeight: '700',
-      color: '#2563eb',
-      marginBottom: '8px',
-    },
-    subtitle: {
-      fontSize: '16px',
-      color: '#6b7280',
-    },
-    inputGroup: {
-      marginBottom: '16px',
-    },
-    label: {
-      display: 'block',
-      marginBottom: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#4b5563',
-    },
-    inputWrapper: {
-      position: 'relative' as const,
-    },
-    input: {
-      width: '100%',
-      padding: '12px 16px 12px 40px',
-      borderRadius: '8px',
-      border: '1px solid #d1d5db',
-      fontSize: '16px',
-      transition: 'border-color 0.2s ease',
-      outline: 'none',
-      color: '#000000', // Changed to black color for the input text
-    },
-    inputFocus: {
-      borderColor: '#2563eb',
-      boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
-    },
-    inputError: {
-      borderColor: '#ef4444',
-    },
-    helperText: {
-      fontSize: '12px',
-      color: '#6b7280',
-      marginTop: '8px',
-      textAlign: 'center' as const,
-    },
-    errorContainer: {
-      backgroundColor: '#fef2f2',
-      color: '#b91c1c',
-      borderRadius: '8px',
-      padding: '12px 16px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      border: '1px solid #fee2e2',
-    },
-    errorText: {
-      fontSize: '14px',
-    },
-    button: {
-      backgroundColor: '#2563eb',
-      color: 'white',
-      padding: '12px 16px',
-      borderRadius: '8px',
-      border: 'none',
-      cursor: 'pointer',
-      width: '100%',
-      fontSize: '16px',
-      fontWeight: '500',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.2s ease',
-    },
-    buttonHover: {
-      backgroundColor: '#1d4ed8',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 4px 6px rgba(37, 99, 235, 0.15)',
-    },
-    buttonDisabled: {
-      backgroundColor: '#93c5fd',
-      cursor: 'not-allowed',
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Ошибка подключения к серверу');
+      setLoading(false);
     }
   };
 
-  // Add keyframe animation for spinner
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
 
   return (
-    <>
-      <Head>
-        <title>{translations.title} - {translations.loginButton}</title>
-        <meta name="description" content={translations.subtitle} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center p-4">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-      <div style={styles.container}>
-        <div style={styles.formContainer}>
-          <div style={styles.header}>
-            <div style={styles.logo}>{translations.title}</div>
-            <div style={styles.subtitle}>{translations.subtitle}</div>
+      {/* Login Card */}
+      <div className="relative w-full max-w-md">
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-r from-indigo-600 to-cyan-600 p-8 text-white">
+            <div className="flex items-center justify-center mb-2">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center">
+                <Lock className="w-8 h-8" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-center mb-2">Tabys</h1>
+            <p className="text-center text-indigo-100 text-sm">Вход в панель администратора</p>
           </div>
 
-          {error && (
-            <div style={styles.errorContainer}>
-              <AlertIcon />
-              <div style={styles.errorText}>{error}</div>
-            </div>
-          )}
+          {/* Form */}
+          <div className="p-8">
+            {/* Success Message */}
+            {success && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 animate-fadeIn">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-900">Успешный вход!</p>
+                  <p className="text-xs text-green-700 mt-1">Перенаправление в систему...</p>
+                </div>
+              </div>
+            )}
 
-          <div style={styles.inputGroup}>
-            <label htmlFor="phone" style={styles.label}>
-              {translations.phoneLabel}
-            </label>
-            <div style={styles.inputWrapper}>
-              <PhoneIcon />
-              <input
-                type="tel"
-                value={phone}
-                onChange={handlePhoneChange}
-                placeholder="+7 (___) ___-__-__"
-                id="phone"
-                style={{
-                  ...styles.input,
-                  ...(error ? styles.inputError : {}),
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2563eb';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = error ? '#ef4444' : '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-shake">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-900">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Phone Input */}
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Номер телефона
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="+7 (___) ___-__-__"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400"
+                />
+              </div>
             </div>
-            <p style={styles.helperText}>
-              {translations.phoneHelper}
-            </p>
+
+            {/* Password Input */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Пароль
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Введите пароль"
+                  className="w-full pl-12 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Login Button */}
+            <button
+              onClick={handleLogin}
+              disabled={loading || success}
+              className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-200 transform ${
+                loading || success
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Вход...</span>
+                </div>
+              ) : success ? (
+                'Успешно!'
+              ) : (
+                'Войти в систему'
+              )}
+            </button>
+
+            {/* Info */}
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500">
+                Защищенное соединение • Tabys Admin Panel
+              </p>
+            </div>
           </div>
+        </div>
 
-          <button
-            style={{
-              ...styles.button,
-              ...(loading ? styles.buttonDisabled : {})
-            }}
-            onClick={handleLogin}
-            disabled={loading}
-            onMouseOver={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#1d4ed8';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.15)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
-          >
-            {loading ? (
-              <>
-                <LoaderIcon />
-                {translations.loadingText}
-              </>
-            ) : translations.loginButton}
-          </button>
+        {/* Footer */}
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-600">
+            © 2024 Tabys. Все права защищены.
+          </p>
         </div>
       </div>
-    </>
+
+      <style jsx>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
+    </div>
   );
 };
 
-export default Login;
+export default TabysAdminLogin;
